@@ -1,0 +1,8 @@
+ssh JS_130
+116565
+ssh claro-cl
+yes
+
+# OLM20
+# comment2
+ssh 172.16.41.169 mmuser

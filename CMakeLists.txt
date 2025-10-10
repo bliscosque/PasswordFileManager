@@ -10,6 +10,10 @@ target_include_directories(sqlite3 PUBLIC external/sqlite)
 add_executable(PasswordFileManager 
     src/main.cpp
     src/core/Database.cpp
+    src/core/FileParser.cpp
+    src/core/FileGenerator.cpp
+    src/core/Models.cpp
+    src/tests/testDB.cpp
 )
 
 target_include_directories(PasswordFileManager PRIVATE src)

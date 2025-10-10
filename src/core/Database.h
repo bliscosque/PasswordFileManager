@@ -1,4 +1,4 @@
-#pragman once
+#pragma once
 #include "Models.h"
 #include <sqlite3.h>
 #include <vector>
@@ -13,4 +13,4 @@ public:
 
 private:
     sqlite3* db;
-}
+};
