@@ -14,3 +14,6 @@ PasswordFileManager.exe
 
 # Test Database
 testDatabase.exe
+
+# Test FileParser
+testFileParser.exe
