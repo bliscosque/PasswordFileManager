@@ -3,14 +3,14 @@
 #include <vector>
 
 struct Config {
-    int id;
-    int file_id;
+    int id = 0;
     std::string description;
     std::string content;
 };
 
 struct File {
-    int id;
+    int id = 0;
     std::string filename;
+    bool locked = false;
     std::vector<Config> configs;
 };
