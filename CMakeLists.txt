@@ -13,8 +13,15 @@ add_executable(PasswordFileManager
     src/core/FileParser.cpp
     src/core/FileGenerator.cpp
     src/core/Models.cpp
-    src/tests/testDB.cpp
+)
+
+add_executable(testDatabase
+    src/tests/testDatabase.cpp
+    src/core/Database.cpp
 )
 
 target_include_directories(PasswordFileManager PRIVATE src)
 target_link_libraries(PasswordFileManager PRIVATE sqlite3)
+
+target_include_directories(testDatabase PRIVATE src)
+target_link_libraries(testDatabase PRIVATE sqlite3)

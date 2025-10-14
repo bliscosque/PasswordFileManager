@@ -8,3 +8,9 @@ cd build
 cmake ..
 cmake --build .
 ```
+
+# Run APP
+PasswordFileManager.exe
+
+# Test Database
+testDatabase.exe

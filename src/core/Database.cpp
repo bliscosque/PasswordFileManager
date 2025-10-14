@@ -86,17 +86,30 @@ int Database::getFileId(const std::string& filePath) {
 }
 
 void Database::insertOrUpdateFile(const std::string& filePath, bool locked) {
-    const char* sql = "INSERT INTO file (filename, locked) VALUES (?, ?) "
-                      "ON CONFLICT(filename) DO UPDATE SET locked=excluded.locked;";
-    
+    int id = getFileId(filePath);
+
     sqlite3_stmt* stmt = nullptr;
 
-    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
-        throw std::runtime_error("Failed to prepare statement");
-    }
+    // new file
+    if (id==-1) {
+        //std::cout << "[DB] Inserting new file: " << filePath << " locked=" << locked << std::endl;
+        const char* sql = "INSERT INTO file (filename, locked) VALUES (?, ?); ";
 
-    sqlite3_bind_text(stmt, 1, filePath.c_str(), -1, SQLITE_STATIC);
-    sqlite3_bind_int(stmt, 2, locked ? 1 : 0);
+        if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+           throw std::runtime_error("Failed to prepare INSERT statement");
+        }
+        sqlite3_bind_text(stmt, 1, filePath.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_int(stmt, 2, locked ? 1 : 0);
+    } else {
+        //std::cout << "[DB] Updating file id=" << id << " locked=" << locked << std::endl;
+        const char* sql = "UPDATE file SET locked= ? WHERE id = ?;";
+
+        if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+           throw std::runtime_error("Failed to prepare UPDATE statement");
+        }
+        sqlite3_bind_int(stmt, 1, locked ? 1 : 0);
+        sqlite3_bind_int(stmt, 2, id);
+    }
 
     if (sqlite3_step(stmt) != SQLITE_DONE) {
         sqlite3_finalize(stmt);
