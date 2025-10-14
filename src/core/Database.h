@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include "Models.h"
 #include <sqlite3.h>
 #include <vector>
@@ -8,9 +9,16 @@ public:
     Database(const std::string& dbPath);
     ~Database();
 
-    void insertFileWithConfigs(const File& file);
-    File getFileWithConfigs(int fileId);
+    void initSchema();
+    bool isFileLocked(const std::string& filePath);
+    void setFileLocked(const std::string& filePath, bool locked);
+
+    int getFileId(const std::string& FilePath);
+    void insertOrUpdateFile(const std::string& filePath, bool locked);
+    
 
 private:
     sqlite3* db;
+
+    void execute(const std::string& sql);
 };
