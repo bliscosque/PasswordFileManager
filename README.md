@@ -10,7 +10,7 @@ cmake --build .
 ```
 
 # Run APP
-PasswordFileManager.exe
+PasswordFileManager.exe lock testFile1.txt
 
 # Test Database
 testDatabase.exe

@@ -15,6 +15,8 @@ public:
 
     int getFileId(const std::string& FilePath);
     void insertOrUpdateFile(const std::string& filePath, bool locked);
+
+    void saveFileModel(const File& file);
     
 
 private:

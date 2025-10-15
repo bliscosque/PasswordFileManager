@@ -25,14 +25,16 @@ int main(int argc, char* argv[]) {
     try {
         Database db("pass.db");
         
-        // if (command == "lock") {
-        //     FileParser parser(db);
-        //     if (db.isFileLocked(filePath)) {
-        //         std::cerr << "File already locked or in use." << std::endl;
-        //         return 1;
-        //     }
-        //     parser.parse(filePath);
-        //     db.setFileLocked(filePath, true);
+        if (command == "lock") {
+            
+            if (db.isFileLocked(filePath)) {
+                std::cerr << "File already locked or in use." << std::endl;
+                return 1;
+            }
+            File file = FileParser::parseFile(filePath);
+            db.saveFileModel(file);
+            db.setFileLocked(filePath, true);
+
         // } else if (command == "unlock") {
         //     if (! db.isFileLocked(filePath)) {
         //         std::cerr << "File already unlocked" << std::endl;
@@ -41,11 +43,10 @@ int main(int argc, char* argv[]) {
         //     FileGenerator generator(db);
         //     generator.generate(filePath);
         //     db.setFileLocked(filePath, false);
-        // }
-        // else {
-        //     printUsage();
-        //     return 1;
-        // }
+        } else {
+            printUsage();
+            return 1;
+        }
         
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;

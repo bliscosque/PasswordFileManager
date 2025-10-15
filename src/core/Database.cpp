@@ -118,3 +118,60 @@ void Database::insertOrUpdateFile(const std::string& filePath, bool locked) {
 
     sqlite3_finalize(stmt);
 }
+
+void Database::saveFileModel(const File &file)
+{
+    execute("BEGIN TRANSACTION;");
+
+    try {
+        //ensure that file is in "file" table
+        insertOrUpdateFile(file.filename, file.locked);
+        int fileId = getFileId(file.filename);
+        if (fileId == -1) {
+            throw std::runtime_error("Failed to retrieve file ID after insert/update");
+        }
+
+        // clean existing configs
+        {
+            sqlite3_stmt* delStmt = nullptr;
+            const char* sqlDel = "DELETE FROM config WHERE file_id = ?;";
+            if (sqlite3_prepare_v2(db, sqlDel, -1, &delStmt, nullptr) != SQLITE_OK) {
+                throw std::runtime_error("Failed to prepare DELETE statement for configs");
+            }
+            sqlite3_bind_int(delStmt, 1, fileId);
+            sqlite3_step(delStmt);
+            sqlite3_finalize(delStmt);
+        }
+
+        // insert new configs
+        sqlite3_stmt* insStmt = nullptr;
+        const char* sqlInsert = "INSERT INTO config (file_id, description, content) VALUES (?, ?, ?);";
+
+        if (sqlite3_prepare_v2(db, sqlInsert, -1, &insStmt, nullptr) != SQLITE_OK) {
+            throw std::runtime_error("Failed to prepare INSERT statement for configs");
+        }
+
+        for (const auto& cfg: file.configs) {
+            sqlite3_bind_int(insStmt, 1, fileId);
+            sqlite3_bind_text(insStmt, 2, cfg.description.c_str(), -1, SQLITE_STATIC);
+            sqlite3_bind_text(insStmt, 3, cfg.content.c_str(), -1, SQLITE_STATIC);
+
+            if (sqlite3_step(insStmt)!=SQLITE_DONE) {
+                sqlite3_finalize(insStmt);
+                throw std::runtime_error("Failed to insert config entry");
+            }
+
+            sqlite3_reset(insStmt);
+            sqlite3_clear_bindings(insStmt);
+        }
+        sqlite3_finalize(insStmt);
+
+        //commit
+        execute("COMMIT");
+        std::cout << "[DB] File model save successfully: " << file.filename << std::endl;
+
+    } catch (const std::exception& e) {
+        execute("ROLLBACK;");
+        throw std::runtime_error(std::string("Error saving file model: ") + e.what());
+    }
+}
