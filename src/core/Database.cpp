@@ -1,5 +1,7 @@
 #include "Database.h"
+#include "Models.h"
 #include <iostream>
+#include <vector>
 
 Database::Database(const std::string& dbPath) : db(nullptr) {
     if (sqlite3_open(dbPath.c_str(), &db) != SQLITE_OK) {
@@ -174,4 +176,36 @@ void Database::saveFileModel(const File &file)
         execute("ROLLBACK;");
         throw std::runtime_error(std::string("Error saving file model: ") + e.what());
     }
+}
+
+std::vector<Config> Database::fetchLogEntriesByFilename(const std::string& filename) {
+    std::vector<Config> entries;
+
+    //get fileID
+    int fileId = getFileId(filename);
+    if (fileId == -1) {
+        throw std::runtime_error("File not found in DB: " + filename);
+    }
+
+    // Recover data 
+
+    const char* sql = "SELECT description, content FROM config WHERE file_id = ? ORDER BY id ASC;";
+    sqlite3_stmt* stmt = nullptr;
+
+    if (sqlite3_prepare16_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+        throw std::runtime_error("Failed to prepare statement for reading configs");
+    }
+
+    sqlite3_bind_int(stmt, 1, fileId);
+    while(sqlite3_step(stmt) == SQLITE_ROW) {
+        Config cfg;
+        cfg.description = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+        cfg.content = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+        entries.push_back(cfg);
+    }
+
+    sqlite3_finalize(stmt);
+
+    return entries;
+    
 }

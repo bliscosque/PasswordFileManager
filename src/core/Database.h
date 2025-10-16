@@ -17,6 +17,8 @@ public:
     void insertOrUpdateFile(const std::string& filePath, bool locked);
 
     void saveFileModel(const File& file);
+
+    std::vector<Config> fetchLogEntriesByFilename(const std::string& fileName);
     
 
 private:
