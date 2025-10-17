@@ -192,7 +192,7 @@ std::vector<Config> Database::fetchLogEntriesByFilename(const std::string& filen
     const char* sql = "SELECT description, content FROM config WHERE file_id = ? ORDER BY id ASC;";
     sqlite3_stmt* stmt = nullptr;
 
-    if (sqlite3_prepare16_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
         throw std::runtime_error("Failed to prepare statement for reading configs");
     }
 
@@ -200,7 +200,7 @@ std::vector<Config> Database::fetchLogEntriesByFilename(const std::string& filen
     while(sqlite3_step(stmt) == SQLITE_ROW) {
         Config cfg;
         cfg.description = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
-        cfg.content = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+        cfg.content = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
         entries.push_back(cfg);
     }
 

@@ -17,3 +17,6 @@ testDatabase.exe
 
 # Test FileParser
 testFileParser.exe
+
+# Test FileGenerator
+testFileGenerator.exe

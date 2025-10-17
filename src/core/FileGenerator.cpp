@@ -15,6 +15,8 @@ bool FileGenerator::generateFile(const std::string &filename)
     writeFile(file);
 
     std::cout << "[FileGenerator] File generated successfully: " << filename <<std::endl;
+
+    return true;
 }
 
 void FileGenerator::writeFile(const File &file)

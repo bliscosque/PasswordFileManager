@@ -26,6 +26,13 @@ add_executable(testFileParser
     src/core/Models.cpp
 )
 
+add_executable(testFileGenerator
+    src/tests/testFileGenerator.cpp
+    src/core/FileGenerator.cpp
+    src/core/Models.cpp
+    src/core/Database.cpp
+)
+
 target_include_directories(PasswordFileManager PRIVATE src)
 target_link_libraries(PasswordFileManager PRIVATE sqlite3)
 
@@ -33,3 +40,6 @@ target_include_directories(testDatabase PRIVATE src)
 target_link_libraries(testDatabase PRIVATE sqlite3)
 
 target_include_directories(testFileParser PRIVATE src)
+
+target_include_directories(testFileGenerator PRIVATE src)
+target_link_libraries(testFileGenerator PRIVATE sqlite3)
