@@ -2,7 +2,8 @@
 #include <string>
 #include "core/Database.h"
 #include "core/FileParser.h"
-//#include "tests/testDB.h"
+#include "core/FileGenerator.h"
+#include "core/Controller.h"
 
 void printUsage() {
     std::cout << "Usage: PasswordFileManager <command> <filePath> " << std::endl;
@@ -21,37 +22,6 @@ int main(int argc, char* argv[]) {
 
     std::string command = argv[1];
     std::string filePath = argv[2];
-
-    try {
-        Database db("pass.db");
-        
-        if (command == "lock") {
-            
-            if (db.isFileLocked(filePath)) {
-                std::cerr << "File already locked or in use." << std::endl;
-                return 1;
-            }
-            File file = FileParser::parseFile(filePath);
-            db.saveFileModel(file);
-            db.setFileLocked(filePath, true);
-
-        // } else if (command == "unlock") {
-        //     if (! db.isFileLocked(filePath)) {
-        //         std::cerr << "File already unlocked" << std::endl;
-        //         return 1;
-        //     }
-        //     FileGenerator generator(db);
-        //     generator.generate(filePath);
-        //     db.setFileLocked(filePath, false);
-        } else {
-            printUsage();
-            return 1;
-        }
-        
-    } catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
-        return 1;
-    }
-
-    return 0;
+    Controller controller;
+    return controller.run(command, filePath, "pass.db");
 }

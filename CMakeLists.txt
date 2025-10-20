@@ -12,6 +12,7 @@ add_executable(PasswordFileManager
     src/core/Database.cpp
     src/core/FileParser.cpp
     src/core/FileGenerator.cpp
+    src/core/Controller.cpp
     src/core/Models.cpp
 )
 

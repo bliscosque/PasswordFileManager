@@ -11,6 +11,7 @@ cmake --build .
 
 # Run APP
 PasswordFileManager.exe lock testFile1.txt
+PasswordFileManager.exe unlock testFile1.txt
 
 # Test Database
 testDatabase.exe
