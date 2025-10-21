@@ -37,10 +37,23 @@ add_executable(testFileGenerator
 target_include_directories(PasswordFileManager PRIVATE src)
 target_link_libraries(PasswordFileManager PRIVATE sqlite3)
 
+# Find OpenSSL and expose a small crypto static library so all targets
+# link consistently to the same implementation object.
+find_package(OpenSSL REQUIRED)
+add_library(crypto STATIC src/core/Crypto.cpp)
+target_include_directories(crypto PUBLIC ${CMAKE_SOURCE_DIR}/src)
+target_link_libraries(crypto PUBLIC OpenSSL::Crypto)
+
+# Link crypto into the main executable
+target_link_libraries(PasswordFileManager PRIVATE crypto)
+
 target_include_directories(testDatabase PRIVATE src)
-target_link_libraries(testDatabase PRIVATE sqlite3)
+target_link_libraries(testDatabase PRIVATE sqlite3 crypto)
 
 target_include_directories(testFileParser PRIVATE src)
 
 target_include_directories(testFileGenerator PRIVATE src)
-target_link_libraries(testFileGenerator PRIVATE sqlite3)
+target_link_libraries(testFileGenerator PRIVATE sqlite3 crypto)
+
+# Ensure testFileParser can include headers and link crypto if needed
+target_link_libraries(testFileParser PRIVATE crypto)

@@ -3,6 +3,7 @@
 #include "Models.h"
 #include <sqlite3.h>
 #include <vector>
+#include "Crypto.h"
 
 class Database {
 public:
@@ -18,7 +19,10 @@ public:
 
     void saveFileModel(const File& file);
 
-    std::vector<Config> fetchLogEntriesByFilename(const std::string& fileName);
+    // Now requires encryption key to encrypt/decrypt content field
+    void saveFileModel(const File& file, const std::string& key);
+
+    std::vector<Config> fetchLogEntriesByFilename(const std::string& fileName, const std::string& key);
     
 
 private:

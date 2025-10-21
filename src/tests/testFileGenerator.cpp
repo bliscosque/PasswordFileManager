@@ -25,7 +25,8 @@ int main() {
     try {
         const std::string testFilename = "test_output.txt";
 
-        Database db(":memory:");
+    Database db(":memory:");
+    const std::string testKey(32, 'K'); // 32-byte test key
 
         File file;
         file.filename = testFilename;
@@ -40,10 +41,10 @@ int main() {
 
         file.configs = {cfg1, cfg2};
 
-        db.saveFileModel(file);
+    db.saveFileModel(file, testKey);
 
-        FileGenerator generator(db);
-        generator.generateFile(testFilename);
+    FileGenerator generator(db);
+    generator.generateFile(testFilename, testKey);
 
         std::string content = readFile(testFilename);
         std::string expected =

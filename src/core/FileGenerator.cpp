@@ -4,9 +4,9 @@
 
 FileGenerator::FileGenerator(Database &db): db(db) {}
 
-bool FileGenerator::generateFile(const std::string &filename)
+bool FileGenerator::generateFile(const std::string &filename, const std::string &key)
 {
-    std::vector<Config> configs = db.fetchLogEntriesByFilename(filename);
+    std::vector<Config> configs = db.fetchLogEntriesByFilename(filename, key);
 
     File file;
     file.filename = filename;

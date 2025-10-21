@@ -3,7 +3,8 @@
 
 int main() {
     try {
-        Database db("test.db");
+    Database db("test.db");
+    const std::string testKey(32, 'K');
         std::string file1 = "c:/Thiago/example1.txt";
 
         std::cout << "Testing file: " << file1 << std::endl;

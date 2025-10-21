@@ -8,7 +8,8 @@
 class FileGenerator {
 public:
     explicit FileGenerator(Database& db);
-    bool generateFile(const std::string& fileName);
+    // generateFile now takes encryption key to decrypt content before writing
+    bool generateFile(const std::string& fileName, const std::string& key);
 
 private:
     Database& db;

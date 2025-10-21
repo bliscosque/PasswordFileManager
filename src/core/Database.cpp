@@ -54,7 +54,7 @@ bool Database::isFileLocked(const std::string& filePath) {
         throw std::runtime_error("Failed to prepare statement");
     }
 
-    sqlite3_bind_text(stmt, 1, filePath.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 1, filePath.c_str(), -1, SQLITE_TRANSIENT);
 
     if (sqlite3_step(stmt) == SQLITE_ROW) {
         locked = sqlite3_column_int(stmt, 0) != 0;
@@ -77,7 +77,7 @@ int Database::getFileId(const std::string& filePath) {
         throw std::runtime_error("Failed to prepare statement");
     }
 
-    sqlite3_bind_text(stmt, 1, filePath.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 1, filePath.c_str(), -1, SQLITE_TRANSIENT);
 
     if (sqlite3_step(stmt) == SQLITE_ROW) {
         id = sqlite3_column_int(stmt, 0);
@@ -100,7 +100,7 @@ void Database::insertOrUpdateFile(const std::string& filePath, bool locked) {
         if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
            throw std::runtime_error("Failed to prepare INSERT statement");
         }
-        sqlite3_bind_text(stmt, 1, filePath.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 1, filePath.c_str(), -1, SQLITE_TRANSIENT);
         sqlite3_bind_int(stmt, 2, locked ? 1 : 0);
     } else {
         //std::cout << "[DB] Updating file id=" << id << " locked=" << locked << std::endl;
@@ -121,7 +121,7 @@ void Database::insertOrUpdateFile(const std::string& filePath, bool locked) {
     sqlite3_finalize(stmt);
 }
 
-void Database::saveFileModel(const File &file)
+void Database::saveFileModel(const File &file, const std::string& key)
 {
     execute("BEGIN TRANSACTION;");
 
@@ -155,8 +155,16 @@ void Database::saveFileModel(const File &file)
 
         for (const auto& cfg: file.configs) {
             sqlite3_bind_int(insStmt, 1, fileId);
-            sqlite3_bind_text(insStmt, 2, cfg.description.c_str(), -1, SQLITE_STATIC);
-            sqlite3_bind_text(insStmt, 3, cfg.content.c_str(), -1, SQLITE_STATIC);
+            sqlite3_bind_text(insStmt, 2, cfg.description.c_str(), -1, SQLITE_TRANSIENT);
+            // encrypt content before storing
+            std::string encrypted;
+            try {
+                encrypted = Crypto::encrypt(cfg.content, key);
+            } catch (const std::exception& e) {
+                sqlite3_finalize(insStmt);
+                throw std::runtime_error(std::string("Encryption failed: ") + e.what());
+            }
+            sqlite3_bind_text(insStmt, 3, encrypted.c_str(), -1, SQLITE_TRANSIENT);
 
             if (sqlite3_step(insStmt)!=SQLITE_DONE) {
                 sqlite3_finalize(insStmt);
@@ -178,7 +186,7 @@ void Database::saveFileModel(const File &file)
     }
 }
 
-std::vector<Config> Database::fetchLogEntriesByFilename(const std::string& filename) {
+std::vector<Config> Database::fetchLogEntriesByFilename(const std::string& filename, const std::string& key) {
     std::vector<Config> entries;
 
     //get fileID
@@ -200,7 +208,18 @@ std::vector<Config> Database::fetchLogEntriesByFilename(const std::string& filen
     while(sqlite3_step(stmt) == SQLITE_ROW) {
         Config cfg;
         cfg.description = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
-        cfg.content = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+        const unsigned char* blob = sqlite3_column_text(stmt, 1);
+        if (blob) {
+            std::string encrypted = reinterpret_cast<const char*>(blob);
+            try {
+                cfg.content = Crypto::decrypt(encrypted, key);
+            } catch (const std::exception& e) {
+                sqlite3_finalize(stmt);
+                throw std::runtime_error(std::string("Decryption failed: ") + e.what());
+            }
+        } else {
+            cfg.content.clear();
+        }
         entries.push_back(cfg);
     }
 

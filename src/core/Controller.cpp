@@ -4,7 +4,7 @@
 #include "FileGenerator.h"
 #include <iostream>
 
-int Controller::run(const std::string& command, const std::string& filePath, const std::string& dbPath) {
+int Controller::run(const std::string& command, const std::string& filePath, const std::string& key, const std::string& dbPath) {
     try {
         Database db(dbPath);
 
@@ -14,7 +14,7 @@ int Controller::run(const std::string& command, const std::string& filePath, con
                 return 1;
             }
             File file = FileParser::parseFile(filePath);
-            db.saveFileModel(file);
+            db.saveFileModel(file, key);
             db.setFileLocked(filePath, true);
             if (std::remove(filePath.c_str()) != 0) {
                 // Revert lock if deletion failed
@@ -29,7 +29,7 @@ int Controller::run(const std::string& command, const std::string& filePath, con
                 return 1;
             }
             FileGenerator generator(db);
-            generator.generateFile(filePath);
+            generator.generateFile(filePath, key);
             db.setFileLocked(filePath, false);
         } else {
             std::cerr << "Unknown command: " << command << std::endl;
