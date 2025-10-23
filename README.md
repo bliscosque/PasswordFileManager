@@ -21,6 +21,9 @@ cmake --build .
 PasswordFileManager.exe lock testFile1.txt pass1234567891011121314151617181920
 PasswordFileManager.exe unlock testFile1.txt pass1234567891011121314151617181920
 
+# Test Everything
+testRunner.exe
+
 # Test Database
 testDatabase.exe
 

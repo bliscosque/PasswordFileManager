@@ -34,6 +34,24 @@ add_executable(testFileGenerator
     src/core/Database.cpp
 )
 
+add_executable(testRunner
+    src/tests/testRunner.cpp
+)
+
+add_executable(testCrypto
+    src/tests/testCrypto.cpp
+    src/core/Crypto.cpp
+)
+
+add_executable(testController
+    src/tests/testController.cpp
+    src/core/Controller.cpp
+    src/core/Database.cpp
+    src/core/FileParser.cpp
+    src/core/FileGenerator.cpp
+    src/core/Models.cpp
+)
+
 target_include_directories(PasswordFileManager PRIVATE src)
 target_link_libraries(PasswordFileManager PRIVATE sqlite3)
 
@@ -57,3 +75,12 @@ target_link_libraries(testFileGenerator PRIVATE sqlite3 crypto)
 
 # Ensure testFileParser can include headers and link crypto if needed
 target_link_libraries(testFileParser PRIVATE crypto)
+
+# Configure new test targets
+target_include_directories(testRunner PRIVATE src)
+
+target_include_directories(testCrypto PRIVATE src)
+target_link_libraries(testCrypto PRIVATE OpenSSL::Crypto)
+
+target_include_directories(testController PRIVATE src)
+target_link_libraries(testController PRIVATE sqlite3 crypto)
