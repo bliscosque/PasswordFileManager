@@ -3,6 +3,11 @@ project(PasswordFileManager)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
+
+find_package(Qt6 COMPONENTS Core Widgets REQUIRED)
 
 add_library(sqlite3 STATIC external/sqlite/sqlite3.c)
 target_include_directories(sqlite3 PUBLIC external/sqlite)
@@ -64,6 +69,26 @@ target_link_libraries(crypto PUBLIC OpenSSL::Crypto)
 
 # Link crypto into the main executable
 target_link_libraries(PasswordFileManager PRIVATE crypto)
+
+# GUI Version
+add_executable(PasswordFileManagerGUI
+    src/main_gui.cpp
+    src/gui/MainWindow.cpp
+    src/core/Database.cpp
+    src/core/FileParser.cpp
+    src/core/FileGenerator.cpp
+    src/core/Controller.cpp
+    src/core/Models.cpp
+    src/core/Crypto.cpp
+)
+
+target_include_directories(PasswordFileManagerGUI PRIVATE src)
+target_link_libraries(PasswordFileManagerGUI PRIVATE
+    sqlite3
+    crypto
+    Qt6::Core
+    Qt6::Widgets
+)
 
 target_include_directories(testDatabase PRIVATE src)
 target_link_libraries(testDatabase PRIVATE sqlite3 crypto)
